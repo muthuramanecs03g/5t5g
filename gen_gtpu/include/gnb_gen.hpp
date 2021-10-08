@@ -76,7 +76,7 @@ class GNBGen : public GNB {
             for (int ihdr = 0; ihdr < NUM_AP; ihdr++) {
                 rte_ether_addr_copy(&dst_eth_addr, &pkt_hdr[ihdr].eth.d_addr);
                 rte_ether_addr_copy(&eth_addr, &pkt_hdr[ihdr].eth.s_addr);
-                pkt_hdr[ihdr].eth.ether_type 			= rte_cpu_to_be_16(RTE_ETHER_TYPE_IPv4);
+                pkt_hdr[ihdr].eth.ether_type 			= rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4);
 
                 pkt_hdr[ihdr].ipv4.version_ihl = IP_VHL_DEF;
                 pkt_hdr[ihdr].ipv4.type_of_service = 0;   
@@ -91,7 +91,7 @@ class GNBGen : public GNB {
 
                 pkt_hdr[ihdr].udp.src_port = rte_cpu_to_be_16(2152);
                 pkt_hdr[ihdr].udp.dst_port = rte_cpu_to_be_16(2152);
-                pkt_hdr[ihdr].udp.dgram_len = rte_cpu_to_be16(GTPU_PAYLOAD_LENGTH + 24);
+                pkt_hdr[ihdr].udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 24);
 
                 pkt_hdr[ihdr].gtpu.version_flags = 0x34;
                 pkt_hdr[ihdr].gtpu.type = 0xff;
@@ -118,7 +118,7 @@ class GNBGen : public GNB {
 
                 pkt_hdr[ihdr].in_udp.src_port = rte_cpu_to_be_16(1234);
                 pkt_hdr[ihdr].in_udp.dst_port = rte_cpu_to_be_16(4321);
-                pkt_hdr[ihdr].in_udp.dgram_len = rte_cpu_to_be16(GTPU_PAYLOAD_IN_UDP_LENGTH);
+                pkt_hdr[ihdr].in_udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_UDP_LENGTH);
             }
 
             mu = _mu;

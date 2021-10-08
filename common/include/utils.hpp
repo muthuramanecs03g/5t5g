@@ -47,6 +47,8 @@
 #include <rte_flow.h>
 #include <rte_mbuf.h>
 #include <rte_mempool.h>
+#include <rte_ip.h>
+#include <rte_byteorder.h>
 
 /////////////////////////////////////////////////////////////////
 // Command Line Options

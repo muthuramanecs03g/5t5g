@@ -47,10 +47,6 @@ static const char short_options[] =
     "i:" /* Num Iterations */
 ;
 
-struct gtpu_data {
-    uint8_t data[996];
-} __attribute__((packed));
-
 ////////////////////////////////////////////////////////////////////////
 //// DPDK config
 ////////////////////////////////////////////////////////////////////////
@@ -58,7 +54,9 @@ struct rte_ether_addr conf_ports_eth_addr[RTE_MAX_ETHPORTS];
 struct rte_ether_addr conf_dst_eth_addr;
 struct rte_mempool * cpu_pool_0 = NULL;
 struct rte_mempool * cpu_pool_1 = NULL;
+struct rte_eth_conf port_eth_conf;
 
+/*
 static struct rte_eth_conf port_eth_conf = {
     .rxmode = {
            .mq_mode = ETH_MQ_RX_RSS,
@@ -73,10 +71,12 @@ static struct rte_eth_conf port_eth_conf = {
     .rx_adv_conf = {
             .rss_conf = {
                     .rss_key = NULL,
+		    .rss_key_len = 0,
                     .rss_hf = ETH_RSS_IP
                     },
             },
 };
+*/
 
 ////////////////////////////////////////////////////////////////////////
 //// Inter-threads communication
@@ -167,11 +167,12 @@ static int tx_core(void *arg)
 
             pkt_hdr_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_template *);
             rte_memcpy(data, &ru->pkt_hdr[iap], sizeof(struct pkt_hdr_template));
-            mbuf_pkt->data_len = sizeof(struct pkt_hdr_template) + sizeof(struct gtpu_data);
+            //mbuf_pkt->data_len = sizeof(struct pkt_hdr_template) + sizeof(struct gtpu_data);
+            mbuf_pkt->data_len = sizeof(struct pkt_hdr_template);
 
-            struct gtpu_data *gdata = rte_pktmbuf_mtod_offset(mbuf_pkt,
-                struct gtpud_data *,
-                sizeof(struct pkt_hdr_template));    
+            //struct gtpu_data *gdata = rte_pktmbuf_mtod_offset(mbuf_pkt,
+            //    struct gtpud_data *,
+            //    sizeof(struct pkt_hdr_template));    
 
             mbuf_pkt->pkt_len  = mbuf_pkt->data_len;
         }
@@ -310,6 +311,17 @@ int main(int argc, char **argv)
     long icore = 0;
     uint16_t nb_rxd = DEF_RX_DESC;
     uint16_t nb_txd = DEF_TX_DESC;
+    port_eth_conf.rxmode.mq_mode = ETH_MQ_RX_RSS;
+    port_eth_conf.rxmode.max_rx_pkt_len = conf_data_room_size;
+    port_eth_conf.rxmode.split_hdr_size = 0;
+    port_eth_conf.rxmode.offloads = 0;
+           
+    port_eth_conf.txmode.mq_mode = ETH_MQ_TX_NONE;
+    port_eth_conf.txmode.offloads = DEV_TX_OFFLOAD_SEND_ON_TIMESTAMP;
+          
+    port_eth_conf.rx_adv_conf.rss_conf.rss_key = NULL;
+    port_eth_conf.rx_adv_conf.rss_conf.rss_key_len = 0;
+    port_eth_conf.rx_adv_conf.rss_conf.rss_hf = ETH_RSS_IP;
 
     printf("************ GTP-U - 5G Generator ************\n\n");
 
@@ -419,7 +431,8 @@ int main(int argc, char **argv)
 
     check_all_ports_link_status(conf_enabled_port_mask);
 
-    uint32_t bytes_per_pkt = ORAN_IQ_HDR_SZ + (PRBS_PER_PACKET * PRB_SIZE(IQ_SAMPLE_SIZE));
+    //uint32_t bytes_per_pkt = ORAN_IQ_HDR_SZ + (PRBS_PER_PACKET * PRB_SIZE(IQ_SAMPLE_SIZE));
+    uint32_t bytes_per_pkt = 1080;
     uint32_t bytes_per_interval_0 = ru0->tx_interval_pkts * bytes_per_pkt;
     float mbytes_per_sec_0 = ((float)bytes_per_interval_0) / ru0->tx_interval_s / 1000000.0;
     float gbits_per_sec_0 = mbytes_per_sec_0 * 8 / 1000.0;
