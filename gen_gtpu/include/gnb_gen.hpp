@@ -28,47 +28,24 @@
 #define GTPU_PAYLOAD_IN_IP_LENGTH       1024
 #define GTPU_PAYLOAD_IN_UDP_LENGTH      1004
 
-// header gtpuv1_t {
-//     bit<3>  version;    /* Version */
-//     bit<1>  pt;         /* Protocol type */
-//     bit<1>  spare;      /* Reserved */
-//     bit<1>  ex_flag;    /* Next extension hdr present? */
-//     bit<1>  seq_flag;   /* Sequence no. */
-//     bit<1>  npdu_flag;  /* N-pdn number present ? */
-//     bit<8>  msgtype;    /* Message type */
-//     bit<16> msglen;     /* Message length */
-//     bit<32> teid;       /* Tunnel endpoint id */
-// }
 struct gtpu_hdr {
-    uint8   version_flags;
-    uint8   type;
-    uint16  length;
-    uint32  teid;
+    uint8_t   version_flags;
+    uint8_t   type;
+    uint16_t  length;
+    uint32_t  teid;
 } __attribute__((packed));
 
-
-// header gtpuv1_ext_hdr_t {
-//     bit<16> seq_num;        /* Sequence Number */
-//     bit<8>  npdu_num;       /* N-PDU number */
-//     bit<8>  nxt_ext_hdr;    /* Next Extension Header type */
-// }
 struct gtpu_ext_hdr {
-    uint16  seq_num;
-    uint8   npdu_num;
-    uint8   nxt_ext_hdr;
+    uint16_t  seq_num;
+    uint8_t   npdu_num;
+    uint8_t   nxt_ext_hdr;
 } __attribute__((packed));
 
-// header pdu_sess_ctr_t {
-//     bit<8>  len;
-//     bit<8>  type;
-//     bit<8>  qfi;
-//     bit<8>  nxt_ext_hdr;
-// }
 struct gtpu_pdu_sess_ctr {
-    uint8 length;
-    uint8 type;
-    uint8 qfi;
-    uint8 nxt_ext_hdr;
+    uint8_t length;
+    uint8_t type;
+    uint8_t qfi;
+    uint8_t nxt_ext_hdr;
 } __attribute__((packed));
 
 struct pkt_hdr_template
