@@ -13,7 +13,8 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 3.10)
-project(5t5g LANGUAGES CXX C CUDA)
+#project(5t5g LANGUAGES CXX C CUDA)
+project(5t5g LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -121,27 +122,27 @@ set(DPDK_LIBS "-Wl,--no-whole-archive -lmlx5 -libverbs -pthread -lnuma -ldl ${DP
 
 
 ############################################ CUDA ###################################################
-
-find_package(CUDA 10 REQUIRED)
-find_library(CUDA_DRIVER_LIBRARY
-             NAMES cuda_driver cuda
-             HINTS ${CUDA_TOOLKIT_ROOT_DIR}
-                   ENV CUDA_PATH
-             PATH_SUFFIXES nvidia/current lib64 lib/x64 lib)
-if (NOT CUDA_DRIVER_LIBRARY)
-    find_library(CUDA_DRIVER_LIBRARY
-                 NAMES cuda_driver cuda
-                 HINTS ${CUDA_TOOLKIT_ROOT_DIR}
-                       ENV CUDA_PATH
-                 PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs compat)
-endif ()
-mark_as_advanced(CUDA_DRIVER_LIBRARY)
+#
+#find_package(CUDA 10 REQUIRED)
+#find_library(CUDA_DRIVER_LIBRARY
+#             NAMES cuda_driver cuda
+#             HINTS ${CUDA_TOOLKIT_ROOT_DIR}
+#                   ENV CUDA_PATH
+#             PATH_SUFFIXES nvidia/current lib64 lib/x64 lib)
+#if (NOT CUDA_DRIVER_LIBRARY)
+#    find_library(CUDA_DRIVER_LIBRARY
+#                 NAMES cuda_driver cuda
+#                 HINTS ${CUDA_TOOLKIT_ROOT_DIR}
+#                       ENV CUDA_PATH
+#                 PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs compat)
+#endif ()
+#mark_as_advanced(CUDA_DRIVER_LIBRARY)
 
 ##################################################################################################
 
-set(COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
-set(COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/common/src)
-
-add_subdirectory(receiver)
-add_subdirectory(generator)
+#set(COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
+#set(COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/common/src)
+#
+#add_subdirectory(receiver)
+#add_subdirectory(generator)
 
