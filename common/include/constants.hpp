@@ -42,7 +42,9 @@ static constexpr uint32_t GPU_PAGE_OFFSET = (GPU_PAGE_SIZE - 1);
 static constexpr uint32_t GPU_PAGE_MASK = (~GPU_PAGE_OFFSET);
 
 static constexpr uint32_t RU_NAME_LEN = 128;
+static constexpr uint32_t GNB_NAME_LEN = 128;
 static constexpr uint32_t NUM_RU = 2;
+static constexpr uint32_t NUM_GNB = 1;
 static constexpr uint32_t NUM_AP = 4; // Warning: do not change this number!
 static constexpr uint32_t DEF_RX_DESC = 1024;
 static constexpr uint32_t DEF_TX_DESC = 1024;
