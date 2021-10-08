@@ -13,7 +13,7 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 3.10)
-#project(5t5g LANGUAGES CXX C CUDA)
+#project(5t5g LANGUAGES CXX C CUDA) # Commented by Muthu
 project(5t5g LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -120,7 +120,7 @@ set(DPDK_LIBS "-Wl,--no-whole-archive -lmlx5 -libverbs -pthread -lnuma -ldl ${DP
 
 #####################################################################################################
 
-
+# Commented by Muthu
 ############################################ CUDA ###################################################
 #
 #find_package(CUDA 10 REQUIRED)
@@ -145,4 +145,11 @@ set(DPDK_LIBS "-Wl,--no-whole-archive -lmlx5 -libverbs -pthread -lnuma -ldl ${DP
 #
 #add_subdirectory(receiver)
 #add_subdirectory(generator)
+
+###################################################################################################
+# 5G GTP-U
+set(COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
+set(COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/common/src)
+
+add_subdirectory(gen_gtpu)
 

@@ -16,21 +16,24 @@ set(TARGET 5t5g_generator)
 
 set(5T5G_GEN_SRCS
         ${COMMON_SRC}/utils.cpp
-        ${COMMON_SRC}/ru.cpp
+        ${COMMON_SRC}/gnb.cpp
         src/main.cpp
         )
 
 add_executable(${TARGET} ${5T5G_GEN_SRCS})
 
+# Commented by Muthu
 # Link with nvToolsExt
-if (ENABLE_NVTX)
-    set(NVTX_LIB nvToolsExt)
-    add_definitions(-DUSE_NVTX=1)
-endif (ENABLE_NVTX)
+# if (ENABLE_NVTX)
+#     set(NVTX_LIB nvToolsExt)
+#     add_definitions(-DUSE_NVTX=1)
+# endif (ENABLE_NVTX)
 
 target_include_directories(${TARGET}    PUBLIC include 
                                         PUBLIC ${COMMON_INCLUDE})
-
+                                        
+# Commented by Muthu
+# target_link_libraries(${TARGET} ${DPDK_LIBS} ${NVTX_LIB})
 target_link_libraries(${TARGET} ${DPDK_LIBS} ${NVTX_LIB})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GNU_SOURCE -O3 -std=c++11  ${CMAKE_COMMON_FLAGS} -g3")
 
