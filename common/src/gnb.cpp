@@ -62,6 +62,7 @@ void GNB::setupQueues() {
     uint8_t socketid = (uint8_t) rte_lcore_to_socket_id(rte_lcore_id());
 
     for(int iqueue = 0; iqueue < NUM_AP; iqueue++) {
+        
         ret = rte_eth_rx_queue_setup(port_id, rxq_list[iqueue], rxd, socketid, NULL, mpool);
         if (ret < 0)
             rte_exit(EXIT_FAILURE, "rte_eth_rx_queue_setup: err=%d, port=%u\n", ret, port_id);
@@ -71,3 +72,33 @@ void GNB::setupQueues() {
             rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup: err=%d, port=%u\n", ret, port_id);
     }
 }
+
+/*
+// Ref: https://doc.dpdk.org/api/rte__ethdev_8h.html#a36ba70a5a6fce2c2c1f774828ba78f8d
+        // port_id: Identifier of the Ethernet Device
+        // rx_queue_id: The index of the rcv queue to setup
+        // nb_rx_desc: Number of rcv descriptors to allocate for the rcv ring
+        // socket_id: Socket identifier in case of NUMA, otherwise NULL, ANY
+        // rx_conf: pointer to the configuration data to be used for the rcv queue
+        // mb_pool:	pointer to the memory pool from which to allocate rte_mbuf network memory 
+        //          buffers to populate each descriptor of the rcv ring
+        // Return Values:
+        //      0 : On Success,
+int rte_eth_rx_queue_setup(
+    uint16_t 	port_id,
+    uint16_t 	rx_queue_id,
+    uint16_t 	nb_rx_desc,
+    unsigned int 	socket_id,
+    const struct rte_eth_rxconf *rx_conf,
+    struct rte_mempool *mb_pool 
+)	
+
+int rte_eth_tx_queue_setup(
+    uint16_t port_id,
+    uint16_t 	tx_queue_id,
+    uint16_t 	nb_tx_desc,
+    unsigned int 	socket_id,
+    const struct rte_eth_txconf *tx_conf 
+)	
+
+*/

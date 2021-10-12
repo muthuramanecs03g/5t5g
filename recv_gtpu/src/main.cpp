@@ -187,29 +187,21 @@ static int validator_core(void *arg)
 {
     long pipeline_idx = (long)arg;
     GNBRecv *ru = ru0;
-    // cudaStream_t stream;
     int nb_tx = 0, bindex = 0, ipkt = 0, opkt = 0;
-    struct burst_item * blist;
+    struct burst_item *blist;
     struct rte_mbuf * tx_mbufs[MAX_MBUFS_BURST];
     uint64_t start_tx = get_timestamp_ns();
     int itxq = 0;
 
-    // if (pipeline_idx == 0)
-    //     ru = ru0;
-    // else
-    //     ru = ru1;
-
     blist = ru->burst_list;
-    // stream = ru->stream;
 
     printf("\n=======> VALIDATOR CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
 
     while (ACCESS_ONCE(force_quit) == 0) {
-        // PUSH_RANGE("wait_burst", 7);
+        // Wait RX Burst
         while (ACCESS_ONCE(force_quit) == 0 && ACCESS_ONCE(blist[bindex].status) != BURST_DONE);
         rte_rmb();
-        // POP_RANGE;
-
+   
         for (ipkt = 0, opkt = 0; ipkt < blist[bindex].num_mbufs && opkt < blist[bindex].num_mbufs; ipkt++)
         {
             if (blist[bindex].good[ipkt] == 1)
@@ -237,19 +229,12 @@ static int validator_core(void *arg)
 static int rx_core(void *arg)
 {
     long pipeline_idx = (long)arg;
-    RURecv *ru = ru0; 
-    // cudaStream_t stream;
+    GNBRecv *ru = ru0; 
     int nb_rx = 0, bindex = 0;
     struct burst_item * blist;
     int irxq = 0;
-
-    // if (pipeline_idx == 0)
-    //     ru = ru0;
-    // else
-    //     ru = ru1;
-    
+   
     blist = ru->burst_list;
-    // stream = ru->stream;
 
     printf("\n=======> RX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
     
@@ -260,7 +245,7 @@ static int rx_core(void *arg)
             return -1;
         }
 
-        // PUSH_RANGE("rx_burst", 1);
+        // RX Burst
         nb_rx = 0;
         while (ACCESS_ONCE(force_quit) == 0 && nb_rx < (conf_pkt_burst_size - GAP_PKTS))
         {
@@ -272,13 +257,10 @@ static int rx_core(void *arg)
             irxq = (irxq + 1) % NUM_AP;
         }
 
-        // POP_RANGE;
-
         if (!nb_rx)
             continue;
 
-        // PUSH_RANGE("prep_pkts", 3);
-
+        // Prepare packets
         blist[bindex].num_mbufs = nb_rx;
         for (int index=0; index < nb_rx; index++) {
             blist[bindex].addr[index] 	= (uintptr_t) rte_pktmbuf_mtod_offset(blist[bindex].mbufs[index], void*, 0);
@@ -287,18 +269,8 @@ static int rx_core(void *arg)
         }
         rte_wmb();
 
-        // POP_RANGE;
-
         ACCESS_ONCE(blist[bindex].status) = BURST_READY;
         rte_wmb();
-
-        // PUSH_RANGE("macswap_gpu", 4);
-        // launch_gpu_processing(
-        //                     blist[bindex].addr, blist[bindex].num_mbufs, blist[bindex].good, &(blist[bindex].status),
-        //                     ru->eAxC_list[0], ru->eAxC_list[1], ru->eAxC_list[2], ru->eAxC_list[3], 
-        //                     CUDA_BLOCKS, THREADS_BLOCK, stream
-        //                 );
-        // POP_RANGE;
 
         bindex = (bindex + 1) % MAX_BURSTS_X_PIPELINE;
     }
@@ -311,8 +283,9 @@ static int stats_core(void* arg)
     uint64_t sec = 0;
     uint64_t start = get_timestamp_ns();
 
+    // Print the log at every seconds
     while (ACCESS_ONCE(force_quit) == 0) {
-        while((get_timestamp_ns() - start) < 1 * 1000 * 1000 * 1000);
+        while ((get_timestamp_ns() - start) < 1 * 1000 * 1000 * 1000) ;
         // fprintf(stderr, "%ld sec) %s OK=%ld ERR=%ld / %s OK=%ld ERR=%ld\n", 
         //             sec,
         //             ru0->name, ru0->good_pkts, ru0->bad_pkts,
@@ -449,7 +422,6 @@ int main(int argc, char **argv)
     ////////////////////
     printf("Initializing port %u with %d RX queues and %d TX queues...\n", 
         conf_port_id, conf_num_rx_queue, conf_num_tx_queue);
-
     ret = rte_eth_dev_configure(conf_port_id,
         conf_num_rx_queue,
         conf_num_tx_queue,
@@ -487,7 +459,6 @@ int main(int argc, char **argv)
     //////////////////////
     //// START DEVICE
     //////////////////////
-
      // Muthu - No flow rule
     // if (rte_flow_isolate(conf_port_id, 1, &flowerr)) {
     //     rte_panic("Flow isolation failed: %s\n", flowerr.message);
