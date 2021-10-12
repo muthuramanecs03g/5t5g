@@ -40,7 +40,7 @@ static int acc_send_sched_dynfield_bitnum = 0;
 
 static uint64_t tx_offset_pkts_ns = 7 * 100 * 1000;
 // static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
-static uint64_t tx_interval_pkts = MAX_MBUFS_BURST * 2;
+static uint64_t tx_interval_pkts = MAX_MBUFS_BURST;
 
 static const char short_options[] = 
     "d:" /* Dst Eth Addr */
