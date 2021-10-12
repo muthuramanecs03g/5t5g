@@ -129,17 +129,17 @@ static void signal_handler(int signum)
 static int tx_core(void *arg)
 {
     long pipeline_idx = (long)arg;
-    GNBGen *ru;
+    GNBGen *ru = ru0;
     int nb_tx = 0, tx_queue = 0;
     struct rte_mbuf * tx_mbufs[MAX_MBUFS_BURST];
     uint64_t start_tx;
     int itxq = 0, prb_size = 48, local_iterations = 0;
     bool infinite_loop = false;
 
-    if (pipeline_idx == 0)
-        ru = ru0;
-    else
-        ru = ru1;
+    // if (pipeline_idx == 0)
+    //     ru = ru0;
+    // else
+    //     ru = ru1;
 
     printf("\n=======> TX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
 
@@ -458,8 +458,7 @@ int main(int argc, char **argv)
     ////////////////////////////////////////////////////////////////
     //// START RX/TX CORES
     ////////////////////////////////////////////////////////////////
-    for(icore = 0; icore < conf_num_pipelines; icore++)
-    {
+    for (icore = 0; icore < conf_num_pipelines; icore++) {
         secondary_id = rte_get_next_lcore(secondary_id, 1, 0);
         rte_eal_remote_launch(tx_core, (void *)icore, secondary_id);
     }
