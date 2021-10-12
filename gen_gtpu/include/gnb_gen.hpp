@@ -139,7 +139,7 @@ class GNBGen : public GNB {
             //     tx_interval_ns = tx_interval_step * 100 * 1000;
             //     tx_interval_s = (float) tx_interval_step * 0.0001;
             // }
-            tx_interval_step = 2;
+            tx_interval_step = 1;
             tx_interval_ns = tx_interval_step * 100 * 1000;
             tx_interval_s = (float) tx_interval_step * 0.0001;
         }
