@@ -444,16 +444,16 @@ int main(int argc, char **argv)
         mbytes_per_sec_0,
         gbits_per_sec_0);
 
-    uint32_t bytes_per_interval_1 = ru1->tx_interval_pkts * bytes_per_pkt;
-    float mbytes_per_sec_1 = ((float)bytes_per_interval_1) / ru1->tx_interval_s / 1000000.0;
-    float gbits_per_sec_1 = mbytes_per_sec_1 * 8 / 1000.0;
-    printf("%s Estimated pkts %d data %dB Interval S %f data rate %f MB/s -> %f Gbps\n", 	
-        ru1->name,
-        ru1->tx_interval_pkts,
-        bytes_per_pkt,
-        ru1->tx_interval_s,
-        mbytes_per_sec_1,
-        gbits_per_sec_1);
+    // uint32_t bytes_per_interval_1 = ru1->tx_interval_pkts * bytes_per_pkt;
+    // float mbytes_per_sec_1 = ((float)bytes_per_interval_1) / ru1->tx_interval_s / 1000000.0;
+    // float gbits_per_sec_1 = mbytes_per_sec_1 * 8 / 1000.0;
+    // printf("%s Estimated pkts %d data %dB Interval S %f data rate %f MB/s -> %f Gbps\n", 	
+    //     ru1->name,
+    //     ru1->tx_interval_pkts,
+    //     bytes_per_pkt,
+    //     ru1->tx_interval_s,
+    //     mbytes_per_sec_1,
+    //     gbits_per_sec_1);
 
     ////////////////////////////////////////////////////////////////
     //// START RX/TX CORES
