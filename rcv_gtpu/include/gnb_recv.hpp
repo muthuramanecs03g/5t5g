@@ -42,9 +42,9 @@ class GNBRecv : public GNB {
 		~GNBRecv();
 		void setFlowRule();
 
-		struct burst_item * burst_list;
+		struct burst_item 	*burst_list;
 		// cudaStream_t        stream;
-		struct rte_flow *   frule[NUM_AP];
+		struct rte_flow 	*frule[NUM_AP];
 		volatile uint64_t   good_pkts;
 		volatile uint64_t   bad_pkts;
 };

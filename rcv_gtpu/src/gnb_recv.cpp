@@ -131,6 +131,11 @@ GNBRecv::GNBRecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
 	bad_pkts = 0;
 
 	//CUDA_CHECK(cudaMallocHost((void **)&burst_list, MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item)));
+	burst_list = malloc(MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item));
+	if (burst_list == NULL) {
+		printf("Failed to allocate memory");
+		return;
+	}
 
 	for (int bindex = 0; bindex < MAX_BURSTS_X_PIPELINE; bindex++) {
 		burst_list[bindex].bytes = 0;
@@ -148,6 +153,9 @@ GNBRecv::GNBRecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
 }
 
 GNBRecv::~GNBRecv() {
+	if (burst_list != NULL) {
+		free(burst_list);
+	}
 	// CUDA_CHECK(cudaStreamDestroy(stream));
 	// CUDA_CHECK(cudaFreeHost(burst_list));
 
