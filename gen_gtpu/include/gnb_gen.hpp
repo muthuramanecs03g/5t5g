@@ -128,17 +128,20 @@ class GNBGen : public GNB {
             tx_offset_pkts_ns = _tx_offset_pkts_ns;
             tx_interval_pkts = _tx_interval_pkts; //128;
 
-            if (mu == 0)  {
-                //1ms 15kHZ SCS
-                tx_interval_step = 10;
-                tx_interval_ns = tx_interval_step * 100 * 1000;
-                tx_interval_s = (float) tx_interval_step * 0.0001;
-            } else {
-                //by default 500us 30kHZ SCS
-                tx_interval_step = 5;
-                tx_interval_ns = tx_interval_step * 100 * 1000;
-                tx_interval_s = (float) tx_interval_step * 0.0001;
-            }
+            // if (mu == 0)  {
+            //     //1ms 15kHZ SCS
+            //     tx_interval_step = 10;
+            //     tx_interval_ns = tx_interval_step * 100 * 1000;
+            //     tx_interval_s = (float) tx_interval_step * 0.0001;
+            // } else {
+            //     //by default 500us 30kHZ SCS
+            //     tx_interval_step = 5;
+            //     tx_interval_ns = tx_interval_step * 100 * 1000;
+            //     tx_interval_s = (float) tx_interval_step * 0.0001;
+            // }
+            tx_interval_step = 2;
+            tx_interval_ns = tx_interval_step * 100 * 1000;
+            tx_interval_s = (float) tx_interval_step * 0.0001;
         }
 
         ~GNBGen();
