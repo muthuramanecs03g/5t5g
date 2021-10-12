@@ -131,7 +131,7 @@ GNBRecv::GNBRecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
 	bad_pkts = 0;
 
 	//CUDA_CHECK(cudaMallocHost((void **)&burst_list, MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item)));
-	burst_list = malloc(MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item));
+	burst_list = (struct burst_item *) malloc(MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item));
 	if (burst_list == NULL) {
 		printf("Failed to allocate memory");
 		return;
