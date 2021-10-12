@@ -39,7 +39,8 @@ static int acc_send_sched_dynfield_offset = 0;
 static int acc_send_sched_dynfield_bitnum = 0;
 
 static uint64_t tx_offset_pkts_ns = 7 * 100 * 1000;
-static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
+// static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
+static uint64_t tx_interval_pkts = MAX_MBUFS_BURST;
 
 static const char short_options[] = 
     "d:" /* Dst Eth Addr */
@@ -52,8 +53,8 @@ static const char short_options[] =
 ////////////////////////////////////////////////////////////////////////
 struct rte_ether_addr conf_ports_eth_addr[RTE_MAX_ETHPORTS];
 struct rte_ether_addr conf_dst_eth_addr;
-struct rte_mempool * cpu_pool_0 = NULL;
-struct rte_mempool * cpu_pool_1 = NULL;
+struct rte_mempool *cpu_pool_0 = NULL;
+struct rte_mempool *cpu_pool_1 = NULL;
 struct rte_eth_conf port_eth_conf;
 
 /*
@@ -178,8 +179,7 @@ static int tx_core(void *arg)
         }
 
         nb_tx = 0;
-        while(ACCESS_ONCE(force_quit) == 0 && nb_tx < ru->tx_interval_pkts)
-        {
+        while (ACCESS_ONCE(force_quit) == 0 && nb_tx < ru->tx_interval_pkts) {
             nb_tx += rte_eth_tx_burst(ru->port_id, ru->txq_list[tx_queue], 
                                         &(tx_mbufs[nb_tx]),
                                         ru->tx_interval_pkts - nb_tx);
