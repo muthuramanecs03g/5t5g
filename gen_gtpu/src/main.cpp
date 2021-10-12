@@ -188,7 +188,7 @@ static int tx_core(void *arg)
         tx_queue = (tx_queue + 1) % NUM_AP;
 
         //Infinite loop with conf_iterations == 0
-        if(infinite_loop == false)
+        if (infinite_loop == false)
             local_iterations++;
     }
 

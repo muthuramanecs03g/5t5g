@@ -48,8 +48,11 @@ struct gtpu_pdu_sess_ctr {
     uint8_t nxt_ext_hdr;
 } __attribute__((packed));
 
-struct pkt_hdr_template
-{
+struct payload_data {
+    uint8_t data[996];
+}
+
+struct pkt_hdr_template {
     struct rte_ether_hdr        eth;
     struct rte_ipv4_hdr         ipv4;
     struct rte_udp_hdr          udp;
@@ -58,7 +61,7 @@ struct pkt_hdr_template
     struct gtpu_pdu_sess_ctr    pdu_sess_ctr;
     struct rte_ipv4_hdr         in_ipv4;
     struct rte_udp_hdr          in_udp;
-
+    struct payload_data         payload;
 } __attribute__((packed));
 
 class GNBGen : public GNB {
