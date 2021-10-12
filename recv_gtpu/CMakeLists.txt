@@ -12,29 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TARGET 5t5g_receiver)
+set(TARGET gtpu_receiver)
 
 set(5T5G_RECV_SRCS
         ${COMMON_SRC}/utils.cpp
-        ${COMMON_SRC}/ru.cpp
+        ${COMMON_SRC}/gnb.cpp
         src/kernel.cu
         src/main.cpp
-        src/ru_recv.cpp
+        src/gnb_recv.cpp
         )
 
 add_executable(${TARGET} ${5T5G_RECV_SRCS})
 
 # Link with nvToolsExt
-if (ENABLE_NVTX)
-    set(NVTX_LIB nvToolsExt)
-    add_definitions(-DUSE_NVTX=1)
-endif (ENABLE_NVTX)
+# Commented by Muthu
+# if (ENABLE_NVTX)
+#     set(NVTX_LIB nvToolsExt)
+#     add_definitions(-DUSE_NVTX=1)
+# endif (ENABLE_NVTX)
 
 target_include_directories(${TARGET}    PUBLIC include 
-                                        PUBLIC ${COMMON_INCLUDE}
-                                        PUBLIC ${CUDA_INCLUDE_DIRS})
+                                        PUBLIC ${COMMON_INCLUDE})
+                                        #PUBLIC ${CUDA_INCLUDE_DIRS}) # By muthu
 
-target_link_libraries(${TARGET} ${DPDK_LIBS} ${CUDA_LIBRARIES} ${CUDA_DRIVER_LIBRARY} ${NVTX_LIB})
+# target_link_libraries(${TARGET} ${DPDK_LIBS} ${CUDA_LIBRARIES} ${CUDA_DRIVER_LIBRARY} ${NVTX_LIB}) # By Muthu
+target_link_libraries(${TARGET} ${DPDK_LIBS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GNU_SOURCE -O3 -std=c++11  ${CMAKE_COMMON_FLAGS} -g3")
 
 # Enable to debug CUDA kernels

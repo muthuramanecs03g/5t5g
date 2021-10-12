@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TARGET 5t5g_generator)
+set(TARGET gtpu_generator)
 
 set(5T5G_GEN_SRCS
         ${COMMON_SRC}/utils.cpp

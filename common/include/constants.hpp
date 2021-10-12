@@ -57,4 +57,12 @@ static constexpr uint32_t MAX_MBUFS_BURST = 512;
 static constexpr uint32_t THREADS_BLOCK = MAX_MBUFS_BURST;
 static constexpr uint32_t CUDA_BLOCKS = (MAX_MBUFS_BURST + THREADS_BLOCK - 1) / THREADS_BLOCK;
 
+// By Muthu
+enum {
+   	DEFAULT_PRIV_SIZE       = 0,
+	/* See: http://dpdk.org/dev/patchwork/patch/4479/ */
+	/* MBUF_SIZE = 2048 +128 = 2176 */
+	MBUF_SIZE		= RTE_MBUF_DEFAULT_BUF_SIZE + DEFAULT_PRIV_SIZE, 
+}
+
 #endif

@@ -14,12 +14,12 @@
 * limitations under the License.
 */
 
-#ifndef RU_RECV_HPP_
-#define RU_RECV_HPP_
+#ifndef GNB_RECV_HPP_
+#define GNB_RECV_HPP_
 
-#include "ru.hpp"
-#include "cuda_headers.hpp"
-#include "oran_receiver.hpp"
+#include "gnb.hpp"
+// #include "cuda_headers.hpp"
+// #include "oran_receiver.hpp"
 #include <rte_mbuf.h>
 
 struct burst_item {
@@ -33,18 +33,17 @@ struct burst_item {
 	uint64_t           bytes;
 };
 
-class RURecv : public RU {
-
+class GNBRecv : public GNB {
 	public:
-		RURecv(int _index, struct rte_ether_addr &_eth_addr, 
+		GNBRecv(int _index, struct rte_ether_addr &_eth_addr, 
 				uint16_t _ap0, uint16_t _ap1, uint16_t _ap2, uint16_t _ap3,
 				uint16_t _vlan_tci, uint8_t _port_id, uint16_t _rxd, uint16_t _txd,
 				struct rte_mempool * _mpool);
-		~RURecv();
+		~GNBRecv();
 		void setFlowRule();
 
 		struct burst_item * burst_list;
-		cudaStream_t        stream;
+		// cudaStream_t        stream;
 		struct rte_flow *   frule[NUM_AP];
 		volatile uint64_t   good_pkts;
 		volatile uint64_t   bad_pkts;

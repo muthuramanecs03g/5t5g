@@ -14,12 +14,12 @@
 * limitations under the License.
 */
 
-#include "ru_recv.hpp"
+#include "gnb_recv.hpp"
 
 static struct rte_flow *setup_rules(uint16_t port_id, uint16_t vlan_tci,
-								uint16_t queue_index,
-								struct rte_ether_addr &ru_addr,
-								uint8_t type, uint16_t flow)
+	uint16_t queue_index,
+	struct rte_ether_addr &ru_addr,
+	uint8_t type, uint16_t flow)
 {
 	struct rte_flow_attr attr;
 	struct rte_flow_item patterns[4];
@@ -42,8 +42,7 @@ static struct rte_flow *setup_rules(uint16_t port_id, uint16_t vlan_tci,
 
 	attr.ingress = 1;
 
-	if (type == ECPRI_MSG_TYPE_IQ)
-	{
+	if (type == ECPRI_MSG_TYPE_IQ)	{
 		eth_spec.src.addr_bytes[0] = ru_addr.addr_bytes[0];
 		eth_spec.src.addr_bytes[1] = ru_addr.addr_bytes[1];
 		eth_spec.src.addr_bytes[2] = ru_addr.addr_bytes[2];
@@ -117,17 +116,17 @@ static struct rte_flow *setup_rules(uint16_t port_id, uint16_t vlan_tci,
 	return rte_flow_create(port_id, &attr, patterns, actions, &err);
 }
 
-RURecv::RURecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
+GNBRecv::GNBRecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
 			uint16_t _ap1, uint16_t _ap2, uint16_t _ap3, uint16_t _vlan_tci,
 			uint8_t _port_id, uint16_t _rxd, uint16_t _txd,
 			struct rte_mempool *_mpool)
 			:
-			RU(_index, _eth_addr, _ap0, _ap1, _ap2, _ap3, _vlan_tci, _port_id, _rxd, _txd, _mpool)
+			GNB(_index, _eth_addr, _ap0, _ap1, _ap2, _ap3, _vlan_tci, _port_id, _rxd, _txd, _mpool)
 {
 	good_pkts = 0;
 	bad_pkts = 0;
 
-	CUDA_CHECK(cudaMallocHost((void **)&burst_list, MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item)));
+	//CUDA_CHECK(cudaMallocHost((void **)&burst_list, MAX_BURSTS_X_PIPELINE * sizeof(struct burst_item)));
 
 	for (int bindex = 0; bindex < MAX_BURSTS_X_PIPELINE; bindex++) {
 		burst_list[bindex].bytes = 0;
@@ -140,20 +139,21 @@ RURecv::RURecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
 			burst_list[bindex].good[index] = 0;
 		}
 	}
-	CUDA_CHECK(cudaStreamCreateWithFlags(&(stream), cudaStreamNonBlocking));
+	
+	//CUDA_CHECK(cudaStreamCreateWithFlags(&(stream), cudaStreamNonBlocking));
 }
 
-RURecv::~RURecv() {
-	CUDA_CHECK(cudaStreamDestroy(stream));
-	CUDA_CHECK(cudaFreeHost(burst_list));
+GNBRecv::~GNBRecv() {
+	// CUDA_CHECK(cudaStreamDestroy(stream));
+	// CUDA_CHECK(cudaFreeHost(burst_list));
 
-	for (int iqueue = 0; iqueue < NUM_AP; iqueue++) {
-		rte_flow_destroy(port_id, frule[iqueue], NULL);
-	}
+	// for (int iqueue = 0; iqueue < NUM_AP; iqueue++) {
+	// 	rte_flow_destroy(port_id, frule[iqueue], NULL);
+	// }
 }
 
-void RURecv::setFlowRule() {
-	for (int iqueue = 0; iqueue < NUM_AP; iqueue++) {
-		frule[iqueue] = setup_rules(port_id, vlan_tci, rxq_list[iqueue], eth_addr, ECPRI_MSG_TYPE_IQ, eAxC_list[iqueue]);
-	}
+void GNBRecv::setFlowRule() {
+	// for (int iqueue = 0; iqueue < NUM_AP; iqueue++) {
+	// 	frule[iqueue] = setup_rules(port_id, vlan_tci, rxq_list[iqueue], eth_addr, ECPRI_MSG_TYPE_IQ, eAxC_list[iqueue]);
+	// }
 }

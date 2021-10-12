@@ -40,12 +40,11 @@ GNB::GNB(int _index, struct rte_ether_addr &_eth_addr,
     txd = _txd;
     mpool = _mpool;
 
-    snprintf(name, RU_NAME_LEN, "RU #%d", index);
+    snprintf(name, RU_NAME_LEN, "GNB #%d", index);
 
     rte_ether_addr_copy(&_eth_addr, &eth_addr);
     
-    for(int iloop=0; iloop < NUM_AP; iloop++)
-    {
+    for (int iloop = 0; iloop < NUM_AP; iloop++) {
         rxq_list[iloop] = (NUM_AP * index) + iloop;
         txq_list[iloop] = rxq_list[iloop];
     }
