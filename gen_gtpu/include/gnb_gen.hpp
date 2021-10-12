@@ -50,7 +50,7 @@ struct gtpu_pdu_sess_ctr {
 
 struct payload_data {
     uint8_t data[996];
-}
+} __attribute__((packed));
 
 struct pkt_hdr_template {
     struct rte_ether_hdr        eth;
