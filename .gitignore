@@ -4,3 +4,8 @@ build/
 # Tags
 tags
 
+# Swap files
+.*.swp
+
+#DO NOT TRACK CHANGES
+external/

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <execinfo.h>
+
 #include "constants.hpp"
 #include "utils.hpp"
 #include "gnb_recv.hpp"
@@ -79,15 +81,30 @@ volatile bool force_quit;
 GNBRecv *ru0;
 GNBRecv *ru1;
 
+#define MAX_BACKTRACE 12
+
 ////////////////////////
 //// Signal Handler
 ////////////////////////
 static void signal_handler(int signum)
 {
+    void *array[MAX_BACKTRACE];
+    size_t size;
+    char **strings;
+    size_t i;
     if (signum == SIGINT || signum == SIGTERM || signum == SIGUSR1 ||
         signum == SIGSEGV || signum == SIGHUP || signum == SIGPIPE) {
         printf("\n\nSignal %d received, preparing to exit...\n", signum);
+	
+	size = backtrace(array, MAX_BACKTRACE);
+	strings = backtrace_symbols(array, size);
+	printf ("Obtained %zd stack frames.\n", size);
+	for (i = 0; i < size; i++)
+		printf ("%s\n", strings[i]);
+	free (strings);
+
         ACCESS_ONCE(force_quit) = 1;
+	abort();
     }
 }
 
@@ -142,6 +159,7 @@ static int parse_args(int argc, char **argv)
     // cudaError_t cuda_ret = cudaSuccess;
     argvopt = argv;
 
+#if 0
     while ((opt = getopt_long(argc, argvopt, short_options, NULL, &option_index)) != EOF)
     {
         switch (opt) {
@@ -166,6 +184,7 @@ static int parse_args(int argc, char **argv)
         argv[optind - 1] = prgname;
 
     ret = optind - 1;
+#endif
     optind = 1;
 
     // if (totDevs < conf_gpu_device_id) {
@@ -173,6 +192,7 @@ static int parse_args(int argc, char **argv)
     //     return -1;
     // }
 
+    printf("conf_num_pipelines: %d rte_lcore_count: %d\n", conf_num_pipelines, (int) rte_lcore_count());
     if (((conf_num_pipelines * 2) + 1) > (int)rte_lcore_count()) {
         fprintf(stderr,
             "Required conf_num_pipelines+1 (%d), cores launched=(%d)\n",
@@ -315,7 +335,7 @@ int main(int argc, char **argv)
     uint16_t nb_txd = DEF_TX_DESC;
     struct rte_flow_error flowerr;
 
-    memset(&port_eth_conf, 0, sizeof(struct rte_eth_conf))
+    memset(&port_eth_conf, 0, sizeof(struct rte_eth_conf));
     port_eth_conf.rxmode.mq_mode = ETH_MQ_RX_RSS;
     port_eth_conf.rxmode.max_rx_pkt_len = conf_data_room_size;
     port_eth_conf.rxmode.split_hdr_size = 0;
@@ -450,9 +470,11 @@ int main(int argc, char **argv)
     ////////////////////
     //// Configure GNBs
     ////////////////////
+    printf("Number of RX/TX descriptors: %u-%u\n", nb_rxd, nb_txd);
     ru0 = new GNBRecv(0, ru0_addr, ru0_ap[0], ru0_ap[1], ru0_ap[2], ru0_ap[3], ru0_vlan, conf_port_id, nb_rxd, nb_txd, mpool_payload);
     ru0->setupQueues();
-    
+    printf("Init and setup GNBRecv success!!!\n");
+
     // ru1 = new GNBRecv(1, ru1_addr, ru1_ap[0], ru1_ap[1], ru1_ap[2], ru1_ap[3], ru1_vlan, conf_port_id, nb_rxd, nb_txd, mpool_payload);
     // ru1->setupQueues();
 

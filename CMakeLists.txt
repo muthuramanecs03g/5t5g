@@ -152,4 +152,5 @@ set(COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
 set(COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/common/src)
 
 add_subdirectory(gen_gtpu)
+add_subdirectory(rcv_gtpu)
 

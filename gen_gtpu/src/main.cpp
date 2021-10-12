@@ -311,6 +311,8 @@ int main(int argc, char **argv)
     long icore = 0;
     uint16_t nb_rxd = DEF_RX_DESC;
     uint16_t nb_txd = DEF_TX_DESC;
+
+    memset(&port_eth_conf, 0, sizeof(struct rte_eth_conf));
     port_eth_conf.rxmode.mq_mode = ETH_MQ_RX_RSS;
     port_eth_conf.rxmode.max_rx_pkt_len = conf_data_room_size;
     port_eth_conf.rxmode.split_hdr_size = 0;

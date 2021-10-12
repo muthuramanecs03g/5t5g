@@ -21,6 +21,9 @@ static struct rte_flow *setup_rules(uint16_t port_id, uint16_t vlan_tci,
 	struct rte_ether_addr &ru_addr,
 	uint8_t type, uint16_t flow)
 {
+	return NULL;
+
+#if 0
 	struct rte_flow_attr attr;
 	struct rte_flow_item patterns[4];
 	struct rte_flow_action actions[2];
@@ -114,6 +117,7 @@ static struct rte_flow *setup_rules(uint16_t port_id, uint16_t vlan_tci,
 		rte_panic("Invalid flow rule: %s\n", err.message);
 
 	return rte_flow_create(port_id, &attr, patterns, actions, &err);
+#endif
 }
 
 GNBRecv::GNBRecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
