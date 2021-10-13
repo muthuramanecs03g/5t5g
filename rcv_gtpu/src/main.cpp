@@ -50,24 +50,6 @@ struct rte_ether_addr conf_ports_eth_addr[RTE_MAX_ETHPORTS];
 struct rte_mempool *mpool_payload;
 // struct rte_pktmbuf_extmem ext_mem;
 
-// static struct rte_eth_conf port_eth_conf = {
-//     .rxmode = {
-//            .mq_mode = ETH_MQ_RX_RSS,
-//            .max_rx_pkt_len = conf_data_room_size,
-//            .split_hdr_size = 0,
-//            .offloads = 0,
-//            },
-//     .txmode = {
-//            .mq_mode = ETH_MQ_TX_NONE,
-//            .offloads = 0,
-//            },
-//     .rx_adv_conf = {
-//             .rss_conf = {
-//                      .rss_key = NULL,
-//                      .rss_hf = ETH_RSS_IP
-//                     },
-//             },
-// };
 struct rte_eth_conf port_eth_conf;
 
 ////////////////////////////////////
@@ -149,6 +131,18 @@ unsigned int conf_parse_device_id(const char *q_arg)
     return n;
 }
 
+unsigned int conf_parse_port_id(const char *q_arg)
+{
+    char *end = NULL;
+    unsigned long n;
+
+    n = strtoul(q_arg, &end, 10);
+    if ((q_arg[0] == '\0') || (end == NULL) || (*end != '\0'))
+        return 0;
+
+    return n;
+}
+
 static int parse_args(int argc, char **argv)
 {
     int opt, ret = 0;
@@ -159,20 +153,22 @@ static int parse_args(int argc, char **argv)
     // cudaError_t cuda_ret = cudaSuccess;
     argvopt = argv;
 
-#if 0
     while ((opt = getopt_long(argc, argvopt, short_options, NULL, &option_index)) != EOF)
     {
         switch (opt) {
-        case 'g': // Muthu - Not required for GTP-U
+        case 'g':           // Muthu - Not required for GTP-U
             conf_gpu_device_id = conf_parse_device_id(optarg);
             break;
         case 'h':
             usage(prgname);
             return -2;
-        case 'n': // Muthu - Not required for GTP-U
+        case 'n':           // Muthu - Not required for GTP-U
             conf_nvprofiler = 1;
             break;
         case 0:
+            break;
+        case 'p':
+            conf_port_id = conf_parse_port_id(optarg);
             break;
         default:
             usage(prgname);
@@ -184,7 +180,6 @@ static int parse_args(int argc, char **argv)
         argv[optind - 1] = prgname;
 
     ret = optind - 1;
-#endif
     optind = 1;
 
     // if (totDevs < conf_gpu_device_id) {

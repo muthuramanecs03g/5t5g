@@ -52,7 +52,7 @@ struct payload_data {
     uint8_t data[996];
 } __attribute__((packed));
 
-struct pkt_hdr_template {
+struct pkt_hdr_ul_template {
     struct rte_ether_hdr        eth;
     struct rte_ipv4_hdr         ipv4;
     struct rte_udp_hdr          udp;
@@ -64,8 +64,14 @@ struct pkt_hdr_template {
     struct payload_data         payload;
 } __attribute__((packed));
 
-class GNBGen : public GNB {
+struct pkt_hdr_dl_template {
+    struct rte_ether_hdr        eth;
+    struct rte_ipv4_hdr         ipv4;
+    struct rte_udp_hdr          udp;
+    struct payload_data         payload;
+} __attribute__((packed));
 
+class GNBGen : public GNB {
     public:
         GNBGen(int _index, struct rte_ether_addr &_eth_addr, 
                 uint16_t _ap0, uint16_t _ap1, uint16_t _ap2, uint16_t _ap3, 
@@ -76,57 +82,80 @@ class GNBGen : public GNB {
         {
             rte_ether_addr_copy(&_dst_eth_addr, &dst_eth_addr);
 
+            // For Uplink
             for (int ihdr = 0; ihdr < NUM_AP; ihdr++) {
-                rte_ether_addr_copy(&dst_eth_addr, &pkt_hdr[ihdr].eth.d_addr);
-                rte_ether_addr_copy(&eth_addr, &pkt_hdr[ihdr].eth.s_addr);
-                pkt_hdr[ihdr].eth.ether_type 			= rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4);
+                rte_ether_addr_copy(&dst_eth_addr, &pkt_hdr_ul[ihdr].eth.d_addr);
+                rte_ether_addr_copy(&eth_addr, &pkt_hdr_ul[ihdr].eth.s_addr);
+                pkt_hdr_ul[ihdr].eth.ether_type = rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4);
 
-                pkt_hdr[ihdr].ipv4.version_ihl = IP_VHL_DEF;
-                pkt_hdr[ihdr].ipv4.type_of_service = 0;   
-                pkt_hdr[ihdr].ipv4.total_length = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 44);      
-                pkt_hdr[ihdr].ipv4.packet_id = 0;     
-                pkt_hdr[ihdr].ipv4.fragment_offset = 0;   
-                pkt_hdr[ihdr].ipv4.time_to_live = IP_DEFTTL;      
-                pkt_hdr[ihdr].ipv4.next_proto_id = IPPROTO_UDP;     
-                pkt_hdr[ihdr].ipv4.hdr_checksum = 0;      
-                pkt_hdr[ihdr].ipv4.src_addr = rte_cpu_to_be_32(0x1e1e0002);      
-                pkt_hdr[ihdr].ipv4.dst_addr = rte_cpu_to_be_32(0x1e1e0003);
+                pkt_hdr_ul[ihdr].ipv4.version_ihl = IP_VHL_DEF;
+                pkt_hdr_ul[ihdr].ipv4.type_of_service = 0;   
+                pkt_hdr_ul[ihdr].ipv4.total_length = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 44);      
+                pkt_hdr_ul[ihdr].ipv4.packet_id = 0;     
+                pkt_hdr_ul[ihdr].ipv4.fragment_offset = 0;   
+                pkt_hdr_ul[ihdr].ipv4.time_to_live = IP_DEFTTL;      
+                pkt_hdr_ul[ihdr].ipv4.next_proto_id = IPPROTO_UDP;     
+                pkt_hdr_ul[ihdr].ipv4.hdr_checksum = 0;      
+                pkt_hdr_ul[ihdr].ipv4.src_addr = rte_cpu_to_be_32(0x1e1e0002);      
+                pkt_hdr_ul[ihdr].ipv4.dst_addr = rte_cpu_to_be_32(0x1e1e0003);
 
-                pkt_hdr[ihdr].udp.src_port = rte_cpu_to_be_16(2152);
-                pkt_hdr[ihdr].udp.dst_port = rte_cpu_to_be_16(2152);
-                pkt_hdr[ihdr].udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 24);
+                pkt_hdr_ul[ihdr].udp.src_port = rte_cpu_to_be_16(2152);
+                pkt_hdr_ul[ihdr].udp.dst_port = rte_cpu_to_be_16(2152);
+                pkt_hdr_ul[ihdr].udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 24);
 
-                pkt_hdr[ihdr].gtpu.version_flags = 0x34;
-                pkt_hdr[ihdr].gtpu.type = 0xff;
-                pkt_hdr[ihdr].gtpu.length = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 8);
-                pkt_hdr[ihdr].gtpu.teid = rte_cpu_to_be_32(0x01);
-                pkt_hdr[ihdr].gtpu_ext.seq_num = rte_cpu_to_be_16(0);
-                pkt_hdr[ihdr].gtpu_ext.npdu_num = 0;
-                pkt_hdr[ihdr].gtpu_ext.nxt_ext_hdr = 0x85;
-                pkt_hdr[ihdr].pdu_sess_ctr.length = 1;
-                pkt_hdr[ihdr].pdu_sess_ctr.type = 0x10;
-                pkt_hdr[ihdr].pdu_sess_ctr.qfi = 0x09;
-                pkt_hdr[ihdr].pdu_sess_ctr.nxt_ext_hdr = 0;
+                pkt_hdr_ul[ihdr].gtpu.version_flags = 0x34;
+                pkt_hdr_ul[ihdr].gtpu.type = 0xff;
+                pkt_hdr_ul[ihdr].gtpu.length = rte_cpu_to_be_16(GTPU_PAYLOAD_LENGTH + 8);
+                pkt_hdr_ul[ihdr].gtpu.teid = rte_cpu_to_be_32(0x01);
+                pkt_hdr_ul[ihdr].gtpu_ext.seq_num = rte_cpu_to_be_16(0);
+                pkt_hdr_ul[ihdr].gtpu_ext.npdu_num = 0;
+                pkt_hdr_ul[ihdr].gtpu_ext.nxt_ext_hdr = 0x85;
+                pkt_hdr_ul[ihdr].pdu_sess_ctr.length = 1;
+                pkt_hdr_ul[ihdr].pdu_sess_ctr.type = 0x10;
+                pkt_hdr_ul[ihdr].pdu_sess_ctr.qfi = 0x09;
+                pkt_hdr_ul[ihdr].pdu_sess_ctr.nxt_ext_hdr = 0;
 
-                pkt_hdr[ihdr].in_ipv4.version_ihl = IP_VHL_DEF;
-                pkt_hdr[ihdr].in_ipv4.type_of_service = 0;   
-                pkt_hdr[ihdr].in_ipv4.total_length = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_IP_LENGTH);      
-                pkt_hdr[ihdr].in_ipv4.packet_id = 0;     
-                pkt_hdr[ihdr].in_ipv4.fragment_offset = 0;   
-                pkt_hdr[ihdr].in_ipv4.time_to_live = IP_DEFTTL;      
-                pkt_hdr[ihdr].in_ipv4.next_proto_id = IPPROTO_UDP;     
-                pkt_hdr[ihdr].in_ipv4.hdr_checksum = 0;      
-                pkt_hdr[ihdr].in_ipv4.src_addr = rte_cpu_to_be_32(0x0a3c0001);      
-                pkt_hdr[ihdr].in_ipv4.dst_addr = rte_cpu_to_be_32(0x0a3c00fe); 
+                pkt_hdr_ul[ihdr].in_ipv4.version_ihl = IP_VHL_DEF;
+                pkt_hdr_ul[ihdr].in_ipv4.type_of_service = 0;   
+                pkt_hdr_ul[ihdr].in_ipv4.total_length = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_IP_LENGTH);      
+                pkt_hdr_ul[ihdr].in_ipv4.packet_id = 0;     
+                pkt_hdr_ul[ihdr].in_ipv4.fragment_offset = 0;   
+                pkt_hdr_ul[ihdr].in_ipv4.time_to_live = IP_DEFTTL;      
+                pkt_hdr_ul[ihdr].in_ipv4.next_proto_id = IPPROTO_UDP;     
+                pkt_hdr_ul[ihdr].in_ipv4.hdr_checksum = 0;      
+                pkt_hdr_ul[ihdr].in_ipv4.src_addr = rte_cpu_to_be_32(0x0a3c0001);      
+                pkt_hdr_ul[ihdr].in_ipv4.dst_addr = rte_cpu_to_be_32(0x0a3c00fe); 
 
-                pkt_hdr[ihdr].in_udp.src_port = rte_cpu_to_be_16(1234);
-                pkt_hdr[ihdr].in_udp.dst_port = rte_cpu_to_be_16(4321);
-                pkt_hdr[ihdr].in_udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_UDP_LENGTH);
+                pkt_hdr_ul[ihdr].in_udp.src_port = rte_cpu_to_be_16(1234);
+                pkt_hdr_ul[ihdr].in_udp.dst_port = rte_cpu_to_be_16(4321);
+                pkt_hdr_ul[ihdr].in_udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_UDP_LENGTH);
+            }
+
+            // For Downlink
+            for (int ihdr = 0; ihdr < NUM_AP; ihdr++) {
+                rte_ether_addr_copy(&dst_eth_addr, &pkt_hdr_dl[ihdr].eth.d_addr);
+                rte_ether_addr_copy(&eth_addr, &pkt_hdr_dl[ihdr].eth.s_addr);
+                pkt_hdr_dl[ihdr].eth.ether_type = rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4);
+
+                pkt_hdr_dl[ihdr].ipv4.version_ihl = IP_VHL_DEF;
+                pkt_hdr_dl[ihdr].ipv4.type_of_service = 0;   
+                pkt_hdr_dl[ihdr].ipv4.total_length = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_IP_LENGTH);      
+                pkt_hdr_dl[ihdr].ipv4.packet_id = 0;     
+                pkt_hdr_dl[ihdr].ipv4.fragment_offset = 0;   
+                pkt_hdr_dl[ihdr].ipv4.time_to_live = IP_DEFTTL;      
+                pkt_hdr_dl[ihdr].ipv4.next_proto_id = IPPROTO_UDP;     
+                pkt_hdr_dl[ihdr].ipv4.hdr_checksum = 0;      
+                pkt_hdr_dl[ihdr].ipv4.src_addr = rte_cpu_to_be_32(0x0a3c0001);      
+                pkt_hdr_dl[ihdr].ipv4.dst_addr = rte_cpu_to_be_32(0x0a3c00fe); 
+
+                pkt_hdr_dl[ihdr].udp.src_port = rte_cpu_to_be_16(1234);
+                pkt_hdr_dl[ihdr].udp.dst_port = rte_cpu_to_be_16(4321);
+                pkt_hdr_dl[ihdr].udp.dgram_len = rte_cpu_to_be_16(GTPU_PAYLOAD_IN_UDP_LENGTH);
             }
 
             mu = _mu;
             tx_offset_pkts_ns = _tx_offset_pkts_ns;
-            tx_interval_pkts = _tx_interval_pkts; //128;
+            tx_interval_pkts = _tx_interval_pkts;
 
             // if (mu == 0)  {
             //     //1ms 15kHZ SCS
@@ -152,7 +181,8 @@ class GNBGen : public GNB {
         int                     tx_offset_pkts_ns;
         float                   tx_interval_s;
         int                     tx_interval_pkts;
-        pkt_hdr_template        pkt_hdr[NUM_AP];
+        pkt_hdr_ul_template     pkt_hdr_ul[NUM_AP];
+        pkt_hdr_dl_template     pkt_hdr_dl[NUM_AP];
         struct rte_ether_addr   dst_eth_addr;        
 };
 

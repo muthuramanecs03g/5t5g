@@ -46,7 +46,7 @@ class GNB {
         uint8_t                 txq_list[NUM_AP];
         struct rte_ether_addr   eth_addr;
         uint16_t                eAxC_list[NUM_AP];
-        struct rte_mempool *    mpool;
+        struct rte_mempool      *mpool;
 };
 
 #endif

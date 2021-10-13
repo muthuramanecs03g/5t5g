@@ -17,7 +17,7 @@
 #include "gnb.hpp"
 
 struct rte_ether_addr ru0_addr = {
-    .addr_bytes = {0x22, 0x06, 0x9C, 0x9A, 0x25, 0xA5}
+    .addr_bytes = {0x00, 0x00, 0x1e, 0x1e, 0x00, 0x02}
 };
 uint16_t ru0_ap[NUM_AP] = {0, 4, 6, 9};
 uint16_t ru0_vlan = 0;
@@ -31,7 +31,7 @@ uint16_t ru1_vlan = 0;
 GNB::GNB(int _index, struct rte_ether_addr &_eth_addr, 
         uint16_t _ap0, uint16_t _ap1, uint16_t _ap2, uint16_t _ap3,
         uint16_t _vlan_tci, uint8_t _port_id, uint16_t _rxd, uint16_t _txd,
-        struct rte_mempool * _mpool)
+        struct rte_mempool *_mpool)
 {
     index = _index;
     vlan_tci = _vlan_tci;
