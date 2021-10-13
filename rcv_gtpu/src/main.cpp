@@ -426,14 +426,23 @@ int main(int argc, char **argv)
     //// MEMORY MEMPOOL
     /////////////////////////////////////
     // Create the mbuf pool
-    mpool_payload = rte_pktmbuf_pool_create("payload_mpool", 
+    mpool_payload1 = rte_pktmbuf_pool_create("payload_mpool1", 
         conf_nb_mbufs,
         conf_mempool_cache,
         DEFAULT_PRIV_SIZE, 
         MBUF_SIZE, 
         rte_socket_id());
-    if (mpool_payload == NULL)
-        rte_exit(EXIT_FAILURE, "Could not create memory mempool\n");
+    if (mpool_payload1 == NULL)
+        rte_exit(EXIT_FAILURE, "Could not create memory mempool1\n");
+
+    mpool_payload2 = rte_pktmbuf_pool_create("payload_mpool2", 
+        conf_nb_mbufs,
+        conf_mempool_cache,
+        DEFAULT_PRIV_SIZE, 
+        MBUF_SIZE, 
+        rte_socket_id());
+    if (mpool_payload2 == NULL)
+        rte_exit(EXIT_FAILURE, "Could not create memory mempool2\n");
 
     port_eth_conf.rxmode.offloads = DEV_RX_OFFLOAD_JUMBO_FRAME;
 
@@ -471,7 +480,18 @@ int main(int argc, char **argv)
     //// Configure GNBs
     ////////////////////
     printf("Number of RX/TX descriptors: %u-%u\n", nb_rxd, nb_txd);
-    ru0 = new GNBRecv(0, ru0_addr, ru0_ap[0], ru0_ap[1], ru0_ap[2], ru0_ap[3], ru0_vlan, conf_port_id, nb_rxd, nb_txd, mpool_payload);
+    ru0 = new GNBRecv(0, 
+        ru0_addr, 
+        ru0_ap[0],
+        ru0_ap[1], 
+        ru0_ap[2], 
+        ru0_ap[3], 
+        ru0_vlan, 
+        conf_port_id,
+        nb_rxd, 
+        nb_txd, 
+        mpool_payload1,
+        mpool_payload2);
     ru0->setupQueues();
     printf("Init and setup GNBRecv success!!!\n");
 

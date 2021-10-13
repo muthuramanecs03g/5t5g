@@ -123,9 +123,9 @@ static struct rte_flow *setup_rules(uint16_t port_id, uint16_t vlan_tci,
 GNBRecv::GNBRecv(int _index, struct rte_ether_addr &_eth_addr, uint16_t _ap0,
 			uint16_t _ap1, uint16_t _ap2, uint16_t _ap3, uint16_t _vlan_tci,
 			uint8_t _port_id, uint16_t _rxd, uint16_t _txd,
-			struct rte_mempool *_mpool)
+			struct rte_mempool *_mpool1, struct rte_mempool *_mpool2)
 			:
-			GNB(_index, _eth_addr, _ap0, _ap1, _ap2, _ap3, _vlan_tci, _port_id, _rxd, _txd, _mpool)
+			GNB(_index, _eth_addr, _ap0, _ap1, _ap2, _ap3, _vlan_tci, _port_id, _rxd, _txd, _mpool1, _mpool2)
 {
 	good_pkts = 0;
 	bad_pkts = 0;
