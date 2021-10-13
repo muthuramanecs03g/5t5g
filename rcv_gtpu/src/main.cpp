@@ -52,7 +52,8 @@ static const char short_options[] =
 //// DPDK config
 ///////////////////
 struct rte_ether_addr conf_ports_eth_addr[RTE_MAX_ETHPORTS];
-struct rte_mempool *mpool_payload;
+struct rte_mempool *mpool_payload1;
+struct rte_mempool *mpool_payload2;
 // struct rte_pktmbuf_extmem ext_mem;
 
 struct rte_eth_conf port_eth_conf;
