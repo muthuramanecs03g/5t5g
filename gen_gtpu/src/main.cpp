@@ -101,6 +101,8 @@ static void setup_accurate_send_scheduling()
 ///////////////////////
 //// Signal Handler
 ///////////////////////
+#define MAX_BACKTRACE 12
+
 static void signal_handler(int signum)
 {
     void *array[MAX_BACKTRACE];
@@ -158,11 +160,11 @@ static int tx_core(void *arg)
             *RTE_MBUF_DYNFIELD(mbuf_pkt, acc_send_sched_dynfield_offset, uint64_t *) = start_tx + ru->tx_offset_pkts_ns;
             if (conf_traffic) {
                 pkt_hdr_dl_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_dl_template *);
-                rte_memcpy(data, &ru->pkt_hdr[iap], sizeof(struct pkt_hdr_dl_template));
+                rte_memcpy(data, &ru->pkt_hdr_dl[iap], sizeof(struct pkt_hdr_dl_template));
                 mbuf_pkt->data_len = sizeof(struct pkt_hdr_dl_template);
             } else {
                 pkt_hdr_ul_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_ul_template *);
-                rte_memcpy(data, &ru->pkt_hdr[iap], sizeof(struct pkt_hdr_ul_template));
+                rte_memcpy(data, &ru->pkt_hdr_ul[iap], sizeof(struct pkt_hdr_ul_template));
                 mbuf_pkt->data_len = sizeof(struct pkt_hdr_ul_template);
             }
             mbuf_pkt->pkt_len  = mbuf_pkt->data_len;

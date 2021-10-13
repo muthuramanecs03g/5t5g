@@ -41,6 +41,11 @@ static const char short_options[] =
     "g:" /* GPU device */
     "h"	 /* help */
     "n:" /* NVTX Profiler */
+    "d:" /* Dst Eth Addr */
+    "i:" /* Num of Iterations */
+    "p:" /* Port Id */
+    "b:" /* Size of the packet */
+    "t:" /* Traffic either Uplink or Downlink */
     ;
 
 ///////////////////
