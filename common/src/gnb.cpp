@@ -61,9 +61,13 @@ GNB::~GNB() {}
 void GNB::setupQueues() {
     int ret = 0;
     uint8_t socketid = (uint8_t) rte_lcore_to_socket_id(rte_lcore_id());
+    struct rte_mempool *mpool;
 
-    for(int iqueue = 0; iqueue < NUM_AP; iqueue++) {
-        
+    for (int iqueue = 0; iqueue < NUM_AP; iqueue++) {
+        mpool = mpool1;
+        if (iqueue % 2 != 0) {
+            mpool = mpool2;
+        }
         ret = rte_eth_rx_queue_setup(port_id, rxq_list[iqueue], rxd, socketid, NULL, mpool);
         if (ret < 0)
             rte_exit(EXIT_FAILURE, "rte_eth_rx_queue_setup: err=%d, port=%u\n", ret, port_id);
