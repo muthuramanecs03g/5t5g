@@ -131,18 +131,20 @@ static int tx_core(void *arg)
 {
     long pipeline_idx = (long)arg;
     GNBGen *ru = ru0;
+     struct rte_mempool *mpool;
     int nb_tx = 0, tx_queue = 0;
     struct rte_mbuf *tx_mbufs[MAX_MBUFS_BURST];
     uint64_t start_tx;
     int itxq = 0, prb_size = 48, local_iterations = 0;
     bool infinite_loop = false;
 
-    // if (pipeline_idx == 0)
-    //     ru = ru0;
-    // else
-    //     ru = ru1;
+    if (pipeline_idx == 0)
+        mpool = ru->mpool1;
+    else
+        mpool = ru->mpool2;
 
-    printf("\n=======> TX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
+    printf("\n=======> Start: TX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
+    
 
     start_tx = get_timestamp_ns();
 
@@ -150,11 +152,10 @@ static int tx_core(void *arg)
     if (conf_iterations == 0)
         infinite_loop = true;
 
-    while (ACCESS_ONCE(force_quit) == 0 && ((local_iterations < conf_iterations) || (infinite_loop == true)))
-    {
+    while (ACCESS_ONCE(force_quit) == 0 && ((local_iterations < conf_iterations) || (infinite_loop == true))) {
         start_tx += ru->tx_interval_ns;
 
-        if (unlikely(0 != rte_pktmbuf_alloc_bulk(ru->mpool, tx_mbufs, ru->tx_interval_pkts)))
+        if (unlikely(0 != rte_pktmbuf_alloc_bulk(mpool, tx_mbufs, ru->tx_interval_pkts)))
             rte_panic("Ran out of mbufs");
 
         while (get_timestamp_ns() < start_tx);
@@ -189,6 +190,9 @@ static int tx_core(void *arg)
         if (infinite_loop == false)
             local_iterations++;
     }
+
+    printf("\n=======> End: TX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
+    printf("Number of iterations done: %u\n", local_iterations);
 
     return 0;
 }
@@ -412,14 +416,14 @@ int main(int argc, char **argv)
     if (cpu_pool_0 == NULL)
         rte_exit(EXIT_FAILURE, "Cannot init mbuf pool 0\n");
     
-    // cpu_pool_1 = rte_pktmbuf_pool_create("mbuf_pool_1", 
-    //     conf_nb_mbufs, 
-    //     conf_mempool_cache, 
-    //     0, 
-    //     conf_data_room_size + RTE_PKTMBUF_HEADROOM,
-    //     rte_socket_id());
-    // if (cpu_pool_1 == NULL)
-    //     rte_exit(EXIT_FAILURE, "Cannot init mbuf pool 1\n");
+    cpu_pool_1 = rte_pktmbuf_pool_create("mbuf_pool_1", 
+        conf_nb_mbufs, 
+        conf_mempool_cache, 
+        0, 
+        conf_data_room_size + RTE_PKTMBUF_HEADROOM,
+        rte_socket_id());
+    if (cpu_pool_1 == NULL)
+        rte_exit(EXIT_FAILURE, "Cannot init mbuf pool 1\n");
 
     ////////////////////
     //// PORT SETUP
@@ -477,7 +481,8 @@ int main(int argc, char **argv)
                     conf_port_id, 
                     nb_rxd, 
                     nb_txd, 
-                    cpu_pool_0, 
+                    cpu_pool_0,
+                    cpu_pool_1,
                     conf_dst_eth_addr, 
                     0, 
                     tx_offset_pkts_ns, 
@@ -507,7 +512,7 @@ int main(int argc, char **argv)
     if (ret != 0)
         rte_exit(EXIT_FAILURE, "rte_eth_dev_start:err=%d, port=%u\n", ret, conf_port_id);
     rte_delay_us(250000);
-    
+
     check_all_ports_link_status(conf_enabled_port_mask);
 
     printf("Size of the Packet: %u\n", conf_packet_size);

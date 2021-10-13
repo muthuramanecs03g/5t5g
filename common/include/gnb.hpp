@@ -32,7 +32,7 @@ class GNB {
         GNB(int _index, struct rte_ether_addr &_eth_addr,
                 uint16_t _ap0, uint16_t _ap1, uint16_t _ap2, uint16_t _ap3,
                 uint16_t _vlan_tci, uint8_t _port_id, uint16_t _rxd, uint16_t _txd,
-                struct rte_mempool * _mpool);
+                struct rte_mempool * _mpool1,  struct rte_mempool * _mpool2);
         ~GNB();
         void setupQueues();
 
@@ -46,7 +46,8 @@ class GNB {
         uint8_t                 txq_list[NUM_AP];
         struct rte_ether_addr   eth_addr;
         uint16_t                eAxC_list[NUM_AP];
-        struct rte_mempool      *mpool;
+        struct rte_mempool      *mpool1;
+        struct rte_mempool      *mpool2;
 };
 
 #endif
