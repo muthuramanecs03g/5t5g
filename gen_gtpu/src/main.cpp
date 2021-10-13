@@ -29,7 +29,8 @@ static int conf_packet_size             = 1080; // Default, packet size
 static int conf_traffic                 = 0;    // Default, Uplink
 static uint32_t conf_data_room_size     = DEF_DATA_ROOM_SIZE; // TODO: Adjust to proper value
 static int conf_pkt_burst_size          = MAX_MBUFS_BURST;
-static int conf_num_pipelines           = NUM_RU;
+// static int conf_num_pipelines           = NUM_RU;
+static int conf_num_pipelines           = 1;
 static int conf_nvprofiler              = 0;
 static int conf_num_rx_queue            = (NUM_AP * NUM_GNB);
 static int conf_num_tx_queue            = (NUM_AP * NUM_GNB);
@@ -42,7 +43,7 @@ static int conf_iterations              = 1000;
 static int acc_send_sched_dynfield_offset = 0;
 static int acc_send_sched_dynfield_bitnum = 0;
 
-static uint64_t tx_offset_pkts_ns = 2 * 100 * 1000;
+static uint64_t tx_offset_pkts_ns = 7 * 100 * 1000;
 //static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
 static uint64_t tx_interval_pkts = MAX_MBUFS_BURST;
 
