@@ -29,8 +29,7 @@ static int conf_packet_size             = 1080; // Default, packet size
 static int conf_traffic                 = 0;    // Default, Uplink
 static uint32_t conf_data_room_size     = DEF_DATA_ROOM_SIZE; // TODO: Adjust to proper value
 static int conf_pkt_burst_size          = MAX_MBUFS_BURST;
-// static int conf_num_pipelines           = NUM_RU;
-static int conf_num_pipelines           = 1;
+static int conf_num_pipelines           = NUM_RU;
 static int conf_nvprofiler              = 0;
 static int conf_num_rx_queue            = (NUM_AP * NUM_GNB);
 static int conf_num_tx_queue            = (NUM_AP * NUM_GNB);
@@ -391,12 +390,15 @@ int main(int argc, char **argv)
     nb_ports = rte_eth_dev_count_avail();
     if (nb_ports == 0)
         rte_exit(EXIT_FAILURE, "No Ethernet ports - bye\n");
+    printf("Number of avail.ports: %u\n", nb_ports);
 
     rte_eth_dev_info_get(conf_port_id, &dev_info);
     printf("\nDevice driver name in use: %s... \n", dev_info.driver_name);
 
     if (strcmp(dev_info.driver_name, "mlx5_pci") != 0)
         rte_exit(EXIT_FAILURE, "Non-Mellanox NICs have not been validated with GTP-U 5G\n");
+
+    rte_delay_ms(100);	/* Wait a bit for things to settle. */
 
     //////////////////////////
     //// CPU MEMORY MEMPOOL
@@ -504,7 +506,8 @@ int main(int argc, char **argv)
     ret = rte_eth_dev_start(conf_port_id);
     if (ret != 0)
         rte_exit(EXIT_FAILURE, "rte_eth_dev_start:err=%d, port=%u\n", ret, conf_port_id);
-
+    rte_delay_us(250000);
+    
     check_all_ports_link_status(conf_enabled_port_mask);
 
     printf("Size of the Packet: %u\n", conf_packet_size);
