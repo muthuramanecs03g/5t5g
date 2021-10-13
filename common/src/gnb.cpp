@@ -23,7 +23,7 @@ uint16_t ru0_ap[NUM_AP] = {0, 4, 6, 9};
 uint16_t ru0_vlan = 0;
 
 struct rte_ether_addr ru1_addr = {
-    .addr_bytes = {0x24, 0x42, 0xA1, 0xD1, 0xC1, 0xA7}
+    .addr_bytes = {0x00, 0x00, 0x1e, 0x1e, 0x00, 0x02}
 };
 uint16_t ru1_ap[NUM_AP] = {1, 3, 5, 7};
 uint16_t ru1_vlan = 0;

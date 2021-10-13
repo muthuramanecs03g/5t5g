@@ -43,8 +43,7 @@ static int acc_send_sched_dynfield_offset = 0;
 static int acc_send_sched_dynfield_bitnum = 0;
 
 static uint64_t tx_offset_pkts_ns = 7 * 100 * 1000;
-// static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
-static uint64_t tx_interval_pkts = MAX_MBUFS_BURST;
+static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
 
 static const char short_options[] = 
     "d:" /* Dst Eth Addr */
@@ -73,7 +72,7 @@ volatile bool force_quit;
 //// GNB Objects
 ///////////////////
 GNBGen *ru0;
-GNBGen *ru1; // Not used, but keep it
+GNBGen *ru1;
 
 static void setup_accurate_send_scheduling()
 {
@@ -130,12 +129,17 @@ static void signal_handler(int signum)
 static int tx_core(void *arg)
 {
     long pipeline_idx = (long)arg;
-    GNBGen *ru = ru0;
+    GNBGen *ru;
     int nb_tx = 0, tx_queue = 0;
     struct rte_mbuf *tx_mbufs[MAX_MBUFS_BURST];
     uint64_t start_tx;
     int itxq = 0, prb_size = 48, local_iterations = 0;
     bool infinite_loop = false;
+
+    if (pipeline_idx == 0)
+        ru = ru0;
+    else
+        ru = ru1;
 
     printf("\n=======> TX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
 
@@ -402,16 +406,16 @@ int main(int argc, char **argv)
         conf_data_room_size + RTE_PKTMBUF_HEADROOM, 
         rte_socket_id());
     if (cpu_pool_0 == NULL)
-        rte_exit(EXIT_FAILURE, "Cannot init mbuf pool\n");
+        rte_exit(EXIT_FAILURE, "Cannot init mbuf pool 0\n");
     
-    // cpu_pool_1 = rte_pktmbuf_pool_create("mbuf_pool_1", 
-    //     conf_nb_mbufs, 
-    //     conf_mempool_cache, 
-    //     0, 
-    //     conf_data_room_size + RTE_PKTMBUF_HEADROOM,
-    //     rte_socket_id());
-    // if (cpu_pool_1 == NULL)
-    //     rte_exit(EXIT_FAILURE, "Cannot init mbuf pool\n");
+    cpu_pool_1 = rte_pktmbuf_pool_create("mbuf_pool_1", 
+        conf_nb_mbufs, 
+        conf_mempool_cache, 
+        0, 
+        conf_data_room_size + RTE_PKTMBUF_HEADROOM,
+        rte_socket_id());
+    if (cpu_pool_1 == NULL)
+        rte_exit(EXIT_FAILURE, "Cannot init mbuf pool 1\n");
 
     ////////////////////
     //// PORT SETUP
@@ -476,21 +480,21 @@ int main(int argc, char **argv)
                     tx_interval_pkts);
     ru0->setupQueues();
 
-    // ru1 = new GNBGen(1, 
-                        // ru1_addr, 
-                        // ru1_ap[0], 
-                        // ru1_ap[1],
-                        // ru1_ap[2], 
-                        // ru1_ap[3], 
-                        // ru1_vlan, 
-                        // conf_port_id, 
-                        // nb_rxd, nb_txd, 
-                        // cpu_pool_1, 
-                        // conf_dst_eth_addr, 
-                        // 1, 
-                        // tx_offset_pkts_ns, 
-                        // tx_interval_pkts);
-    // ru1->setupQueues();
+    ru1 = new GNBGen(1, 
+                    ru1_addr, 
+                    ru1_ap[0], 
+                    ru1_ap[1],
+                    ru1_ap[2], 
+                    ru1_ap[3], 
+                    ru1_vlan, 
+                    conf_port_id, 
+                    nb_rxd, nb_txd, 
+                    cpu_pool_1, 
+                    conf_dst_eth_addr, 
+                    1, 
+                    tx_offset_pkts_ns, 
+                    tx_interval_pkts);
+    ru1->setupQueues();
 
     ////////////////////
     //// START DEVICE
@@ -514,20 +518,20 @@ int main(int argc, char **argv)
         mbytes_per_sec_0,
         gbits_per_sec_0);
 
-    // uint32_t bytes_per_interval_1 = ru1->tx_interval_pkts * bytes_per_pkt;
-    // float mbytes_per_sec_1 = ((float)bytes_per_interval_1) / ru1->tx_interval_s / 1000000.0;
-    // float gbits_per_sec_1 = mbytes_per_sec_1 * 8 / 1000.0;
-    // printf("%s Estimated pkts %d data %dB Interval S %f data rate %f MB/s -> %f Gbps\n", 	
-    //     ru1->name,
-    //     ru1->tx_interval_pkts,
-    //     bytes_per_pkt,
-    //     ru1->tx_interval_s,
-    //     mbytes_per_sec_1,
-    //     gbits_per_sec_1);
+    uint32_t bytes_per_interval_1 = ru1->tx_interval_pkts * bytes_per_pkt;
+    float mbytes_per_sec_1 = ((float)bytes_per_interval_1) / ru1->tx_interval_s / 1000000.0;
+    float gbits_per_sec_1 = mbytes_per_sec_1 * 8 / 1000.0;
+    printf("%s Estimated pkts %d data %dB Interval S %f data rate %f MB/s -> %f Gbps\n", 	
+        ru1->name,
+        ru1->tx_interval_pkts,
+        bytes_per_pkt,
+        ru1->tx_interval_s,
+        mbytes_per_sec_1,
+        gbits_per_sec_1);
 
-    ////////////////////////////////////////////////////////////////
+    /////////////////////////
     //// START RX/TX CORES
-    ////////////////////////////////////////////////////////////////
+    /////////////////////////
     for (icore = 0; icore < conf_num_pipelines; icore++) {
         secondary_id = rte_get_next_lcore(secondary_id, 1, 0);
         rte_eal_remote_launch(tx_core, (void *)icore, secondary_id);
@@ -545,9 +549,9 @@ int main(int argc, char **argv)
         }
     }
 
-    ////////////////////////////////
+    ///////////////////
     //// Print stats
-    ////////////////////////////////
+    ///////////////////
     print_stats();
 
     ////////////////////////////////
