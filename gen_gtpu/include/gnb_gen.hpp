@@ -145,8 +145,8 @@ class GNBGen : public GNB {
                 pkt_hdr_dl[ihdr].ipv4.time_to_live = IP_DEFTTL;      
                 pkt_hdr_dl[ihdr].ipv4.next_proto_id = IPPROTO_UDP;     
                 pkt_hdr_dl[ihdr].ipv4.hdr_checksum = 0;      
-                pkt_hdr_dl[ihdr].ipv4.src_addr = rte_cpu_to_be_32(0x0a3c0001);      
-                pkt_hdr_dl[ihdr].ipv4.dst_addr = rte_cpu_to_be_32(0x0a3c00fe); 
+                pkt_hdr_dl[ihdr].ipv4.src_addr = rte_cpu_to_be_32(0x0a3c00fe);      
+                pkt_hdr_dl[ihdr].ipv4.dst_addr = rte_cpu_to_be_32(0x0a3c0001); 
 
                 pkt_hdr_dl[ihdr].udp.src_port = rte_cpu_to_be_16(1234);
                 pkt_hdr_dl[ihdr].udp.dst_port = rte_cpu_to_be_16(4321);
