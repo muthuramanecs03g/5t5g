@@ -49,7 +49,7 @@ struct gtpu_pdu_sess_ctr {
 } __attribute__((packed));
 
 struct payload_data {
-    uint8_t data[996];
+    uint8_t data[1500];
 } __attribute__((packed));
 
 struct pkt_hdr_ul_template {

@@ -54,7 +54,7 @@ static constexpr uint8_t  PRBS_PER_PACKET = 16;
 static constexpr uint8_t  IQ_SAMPLE_SIZE = 16;
 
 static constexpr uint32_t MAX_BURSTS_X_PIPELINE = 4096;
-static constexpr uint32_t MAX_MBUFS_BURST = 512;
+static constexpr uint32_t MAX_MBUFS_BURST = 4096;
 static constexpr uint32_t THREADS_BLOCK = MAX_MBUFS_BURST;
 static constexpr uint32_t CUDA_BLOCKS = (MAX_MBUFS_BURST + THREADS_BLOCK - 1) / THREADS_BLOCK;
 

@@ -25,7 +25,7 @@
 static uint32_t conf_enabled_port_mask  = 0;
 static int conf_gpu_device_id           = 0;
 static int conf_port_id                 = 0;
-static int conf_packet_size             = 1080; // Default, packet size
+static int conf_payload_size             = 1024; // Default, packet size
 static int conf_traffic                 = 0;    // Default, Uplink
 static uint32_t conf_data_room_size     = DEF_DATA_ROOM_SIZE; // TODO: Adjust to proper value
 static int conf_pkt_burst_size          = MAX_MBUFS_BURST;
@@ -44,7 +44,8 @@ static int acc_send_sched_dynfield_bitnum = 0;
 
 static uint64_t tx_offset_pkts_ns = 7 * 100 * 1000;
 //static uint64_t tx_interval_pkts = MAX_MBUFS_BURST/2;
-static uint64_t tx_interval_pkts = MAX_MBUFS_BURST;
+//static uint64_t tx_interval_pkts = MAX_MBUFS_BURST;
+uint64_t conf_tx_interval_pkts = MAX_MBUFS_BURST;
 
 static const char short_options[] = 
     "d:" /* Dst Eth Addr */
@@ -137,6 +138,8 @@ static int tx_core(void *arg)
     uint64_t start_tx;
     int itxq = 0, prb_size = 48, local_iterations = 0;
     bool infinite_loop = false;
+    uint32_t total_pkt_size = 0;
+    uint32_t expireCnt = 0;
 
     if (pipeline_idx == 0)
         mpool = ru->mpool1;
@@ -158,6 +161,13 @@ static int tx_core(void *arg)
         if (unlikely(0 != rte_pktmbuf_alloc_bulk(mpool, tx_mbufs, ru->tx_interval_pkts)))
             rte_panic("Ran out of mbufs");
 
+        //printf("RU %ld: %ld\n", pipeline_idx, get_timestamp_ns());
+        if (get_timestamp_ns() > start_tx)
+        {
+            expireCnt++;
+        }
+
+
         while (get_timestamp_ns() < start_tx);
 
         for (int ipkt = 0, iap = 0; ipkt < ru->tx_interval_pkts; ipkt++, iap=(iap + 1) % NUM_AP) {
@@ -166,12 +176,18 @@ static int tx_core(void *arg)
             *RTE_MBUF_DYNFIELD(mbuf_pkt, acc_send_sched_dynfield_offset, uint64_t *) = start_tx + ru->tx_offset_pkts_ns;
             if (conf_traffic) {
                 pkt_hdr_dl_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_dl_template *);
-                rte_memcpy(data, &ru->pkt_hdr_dl[iap], sizeof(struct pkt_hdr_dl_template));
-                mbuf_pkt->data_len = sizeof(struct pkt_hdr_dl_template);
+		total_pkt_size = conf_payload_size+86;
+                rte_memcpy(data, &ru->pkt_hdr_dl[iap], total_pkt_size);
+                mbuf_pkt->data_len = total_pkt_size;
+                //rte_memcpy(data, &ru->pkt_hdr_dl[iap], sizeof(struct pkt_hdr_dl_template));
+                //mbuf_pkt->data_len = sizeof(struct pkt_hdr_dl_template);
             } else {
                 pkt_hdr_ul_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_ul_template *);
-                rte_memcpy(data, &ru->pkt_hdr_ul[iap], sizeof(struct pkt_hdr_ul_template));
-                mbuf_pkt->data_len = sizeof(struct pkt_hdr_ul_template);
+		total_pkt_size = conf_payload_size+42;
+                rte_memcpy(data, &ru->pkt_hdr_ul[iap], total_pkt_size);
+                mbuf_pkt->data_len = total_pkt_size;
+                //rte_memcpy(data, &ru->pkt_hdr_ul[iap], sizeof(struct pkt_hdr_ul_template));
+                //mbuf_pkt->data_len = sizeof(struct pkt_hdr_ul_template);
             }
             mbuf_pkt->pkt_len  = mbuf_pkt->data_len;
         }
@@ -192,7 +208,7 @@ static int tx_core(void *arg)
     }
 
     printf("\n=======> End: TX CORE %d on RU %ld: %s\n", rte_lcore_id(), pipeline_idx, ru->name);
-    printf("Number of iterations done: %u\n", local_iterations);
+    printf("Number of iterations done: %u, expire count: %d\n", local_iterations, expireCnt);
 
     return 0;
 }
@@ -252,6 +268,18 @@ unsigned int conf_parse_packet_size(const char *q_arg)
     return n;
 }
 
+unsigned int conf_parse_tx_interval_pkts(const char *q_arg)
+{
+    char *end = NULL;
+    unsigned long n;
+
+    n = strtoul(q_arg, &end, 10);
+    if ((q_arg[0] == '\0') || (end == NULL) || (*end != '\0'))
+        return 512;
+
+    return n;
+}
+
 unsigned int conf_parse_traffic(const char *q_arg)
 {
     char *end = NULL;
@@ -295,14 +323,17 @@ static int parse_args(int argc, char **argv)
             break;
         case 0:
             break;
-        case 'p':
-            conf_port_id = conf_parse_port_id(optarg);
-            break;
+        //case 'p':
+        //    conf_port_id = conf_parse_port_id(optarg);
+        //    break;
         case 'b':
-            conf_packet_size = conf_parse_packet_size(optarg);
+            conf_payload_size = conf_parse_packet_size(optarg);
             break;
         case 't':
             conf_traffic = conf_parse_traffic(optarg);
+            break;
+        case 'p':
+            conf_tx_interval_pkts = conf_parse_tx_interval_pkts(optarg);
             break;
         default:
             usage(prgname);
@@ -486,7 +517,7 @@ int main(int argc, char **argv)
                     conf_dst_eth_addr, 
                     0, 
                     tx_offset_pkts_ns, 
-                    tx_interval_pkts);
+                    conf_tx_interval_pkts);
     ru0->setupQueues();
 
     // ru1 = new GNBGen(1, 
@@ -515,16 +546,17 @@ int main(int argc, char **argv)
 
     check_all_ports_link_status(conf_enabled_port_mask);
 
-    printf("Size of the Packet: %u\n", conf_packet_size);
-    uint32_t bytes_per_pkt = conf_packet_size;
-    uint32_t bytes_per_interval_0 = ru0->tx_interval_pkts * bytes_per_pkt;
+    printf("Size of the Packet: %u\n", conf_payload_size);
+    uint32_t bytes_per_pkt = conf_payload_size;
+    uint32_t bytes_per_interval_0 = ru0->tx_interval_pkts * bytes_per_pkt * NUM_RU;
     float mbytes_per_sec_0 = ((float) bytes_per_interval_0) / ru0->tx_interval_s / 1000000.0;
     float gbits_per_sec_0 = mbytes_per_sec_0 * 8 / 1000.0;
-    printf("%s Estimated pkts %d data %dB Interval S %f data rate %f MB/s -> %f Gbps\n",
+    printf("%s Estimated pkts %d data %dByte Interval S %f RU %d data rate %f MB/s -> %f Gbps\n",
         ru0->name,
         ru0->tx_interval_pkts,
         bytes_per_pkt,
         ru0->tx_interval_s,
+        NUM_RU,
         mbytes_per_sec_0,
         gbits_per_sec_0);
 
