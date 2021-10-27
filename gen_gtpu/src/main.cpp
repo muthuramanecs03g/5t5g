@@ -176,14 +176,14 @@ static int tx_core(void *arg)
             *RTE_MBUF_DYNFIELD(mbuf_pkt, acc_send_sched_dynfield_offset, uint64_t *) = start_tx + ru->tx_offset_pkts_ns;
             if (conf_traffic) {
                 pkt_hdr_dl_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_dl_template *);
-		total_pkt_size = conf_payload_size+86;
+		total_pkt_size = sizeof(struct pkt_hdr_dl_template) - sizeof(payload_data)+ conf_payload_size;
                 rte_memcpy(data, &ru->pkt_hdr_dl[iap], total_pkt_size);
                 mbuf_pkt->data_len = total_pkt_size;
                 //rte_memcpy(data, &ru->pkt_hdr_dl[iap], sizeof(struct pkt_hdr_dl_template));
                 //mbuf_pkt->data_len = sizeof(struct pkt_hdr_dl_template);
             } else {
                 pkt_hdr_ul_template *data = rte_pktmbuf_mtod(mbuf_pkt, pkt_hdr_ul_template *);
-		total_pkt_size = conf_payload_size+42;
+		total_pkt_size = sizeof(struct pkt_hdr_ul_template) - sizeof(payload_data)+ conf_payload_size;
                 rte_memcpy(data, &ru->pkt_hdr_ul[iap], total_pkt_size);
                 mbuf_pkt->data_len = total_pkt_size;
                 //rte_memcpy(data, &ru->pkt_hdr_ul[iap], sizeof(struct pkt_hdr_ul_template));
